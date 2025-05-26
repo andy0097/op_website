@@ -1,18 +1,24 @@
 
-export default function handler(req, res) { 
-    // Set CORS headers
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Or restrict to 'https://openstead.webflow.io'
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-    if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Only POST allowed' });
-    }
+export default function handler(req, res) {
+  // Set CORS headers for every response
+  res.setHeader("Access-Control-Allow-Origin", "https://openstead.webflow.io");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-    const { value } = req.body;
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    return res.status(200).end(); // Must return here with headers already set
+  }
 
-    // Do your secret logic here
-    const result = value * 42; // replace with your real logic
+  // Only allow POST beyond this point
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Only POST allowed" });
+  }
 
-    res.status(200).json({ result });
+  const { value } = req.body;
+
+  // Your secure logic
+  const result = value * 42;
+
+  return res.status(200).json({ result });
 }
