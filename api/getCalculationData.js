@@ -27,8 +27,7 @@ export default async function handler(req, res) {
 
     // Manual validation
     if (
-      typeof surface !== 'number' || isNaN(surface) || surface <= 0 ||
-      typeof location !== 'string' || location.trim() === ''
+       isNaN(surface) || surface <= 0 || location.trim() === ''
     ) {
       return res.status(400).json({ error: "Invalid input. 'surface' must be a positive number and 'location' must be a non-empty string." });
     }
