@@ -2,35 +2,35 @@
   {
     "location": "London",
     "baselineFloodRisk": 85,
-    "projected2050Increase": "18%",
+    "projected2050Increase": 0.18,
     "damageCostFactor": 350,
     "disruptionCostFactor": 175
   },
   {
     "location": "Birmingham",
     "baselineFloodRisk": 72,
-    "projected2050Increase": "22%",
+    "projected2050Increase": 0.22,
     "damageCostFactor": 310,
     "disruptionCostFactor": 160
   },
   {
     "location": "Cardiff",
     "baselineFloodRisk": 95,
-    "projected2050Increase": "25%",
+    "projected2050Increase": 0.25,
     "damageCostFactor": 330,
     "disruptionCostFactor": 180
   },
   {
     "location": "Manchester",
     "baselineFloodRisk": 88,
-    "projected2050Increase": "23%",
+    "projected2050Increase": 0.23,
     "damageCostFactor": 325,
     "disruptionCostFactor": 170
   },
   {
     "location": "Leeds",
     "baselineFloodRisk": 78,
-    "projected2050Increase": "21%",
+    "projected2050Increase": 0.21,
     "damageCostFactor": 315,
     "disruptionCostFactor": 165
   }

@@ -45,8 +45,6 @@ export default async function handler(req, res) {
 
     // Return result
     return res.status(200).json({
-      location,
-      surface,
       floodingVolume,
       oneTimeImpact,
       underusedLand
