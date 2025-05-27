@@ -69,5 +69,5 @@ function calculateOneTimeImpact(floodingVolume, entry) {
 }
 
 function calculateUnderusedLand(surface) {
-  return ((surface * 0.4047) * 0.05) * 1000;
+  return ((surface * 0.4047) * 0.05) * 10000;
 }
