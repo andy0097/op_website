@@ -37,20 +37,31 @@ export default async function handler(req, res) {
     if (!entry) {
       return res.status(404).json({ error: `Location '${location}' not found.` });
     }
-
+    
     // Perform calculations
-    const floodingVolume = calculateFloodingVolume(surface, entry);
-    const oneTimeImpact = calculateOneTimeImpact(floodingVolume, entry);
-    const underusedLand = calculateUnderusedLand(surface);
+    const surfaceNum = parseFloat(surface);
+    if (isNaN(surfaceNum) || surfaceNum <= 0) {
+      
+      const calculations = calculateAll(surfaceNum, entry);
 
-    // Return result
-    return res.status(200).json({
-      floodingVolume,
-      oneTimeImpact,
-      underusedLand
-    });
+      const floodingVolume = calculations.surfaceWaterFloodingVolume;
+      const oneTimeImpact = calculations.oneTimeImpact;
+      const underusedLand = calculations.underusedLand;
+      const npv = calculations.netPresentValue30;
+      const annualisedReturn = calculations.annualisedReturn;
+    
+      // Return result
+      return res.status(200).json({
+        floodingVolume,
+        oneTimeImpact,
+        underusedLand,
+        npv,
+        annualisedReturn
+      });
 
-  } catch (err) {
+    }
+  } 
+  catch (err) {
     console.error("Server error:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
@@ -70,4 +81,86 @@ function calculateOneTimeImpact(floodingVolume, entry) {
 
 function calculateUnderusedLand(surface) {
   return ((surface * 0.4047) * 0.05) * 10000;
+}
+
+
+
+
+// Single all-in-one calculator
+function calculateAll(surface, entry ) {
+  
+  //Define all variables
+  const vars = {
+    // Section 1: Portfolio Calculations
+    conversionToHectares: null,
+
+    // Section 2: Climate Exposure Calculations
+    baselineSurfaceWaterFlooding: null,
+    projectedIncrease: null,
+    surfaceWaterFloodingVolume: null,
+    damageCostFactor: null,
+    disruptionCostFactor: null,
+    oneTimeImpact: null,
+    expectedAnnualImpact: null,
+
+    // Section 3: Opportunity
+    landRequiredPerM3: null,
+    requiredLandForFullImpact: null,
+    underusedLand: null,
+    implementationArea: null,
+    implementationCost: null,
+    annualMaintenanceCost: null,
+    surfaceWaterReduction: null,
+    actualVolumeReduced: null,
+
+    // Section 4: Business Case
+    annualFloodProbability: null,
+    effectiveFloodReduction: null,
+    annualAvoidedDamage: null,
+    annualAvoidedDisruption: null,
+    totalAnnualSavings: null,
+
+    // Net Present Value (30 years)
+    year1: null,
+    year2Plus: null,
+    discountRate: null,
+    netPresentValue30: null,
+    roi30: null,
+    annualisedReturn: null,
+    years: null,
+    annualCashFlow: null
+  };
+
+  // Make Calculations
+  vars.conversionToHectares = surface*0.4047;
+  vars.baselineSurfaceWaterFlooding = entry.baselineFloodRisk;
+  vars.projectedIncrease = entry.projected2050Increase;
+  vars.surfaceWaterFloodingVolume = surface*vars.baselineSurfaceWaterFlooding*(1+vars.projectedIncrease);
+  vars.damageCostFactor = entry.damageCostFactor;
+  vars.disruptionCostFactor = entry.disruptionCostFactor;
+  vars.oneTimeImpact = vars.surfaceWaterFloodingVolume*(vars.damageCostFactor+vars.disruptionCostFactor);
+  vars.annualFloodProbability = 0.033;
+  vars.expectedAnnualImpact = vars.oneTimeImpact*vars.annualFloodProbability;
+  vars.landRequiredPerM3 = 0.1;
+  vars.requiredLandForFullImpact = vars.landRequiredPerM3*vars.surfaceWaterFloodingVolume;
+  vars.underusedLand = (vars.conversionToHectares*0.05)*10000;
+  vars.implementationArea = Math.min(vars.requiredLandForFullImpact, vars.underusedLand);
+  vars.implementationCost = vars.implementationArea*150;
+  vars.annualMaintenanceCost = vars.implementationArea*4;
+  vars.surfaceWaterReduction = vars.surfaceWaterFloodingVolume > 0 ? Math.min(0.75, vars.underusedLand / vars.surfaceWaterFloodingVolume): 0;
+  vars.actualVolumeReduced = vars.surfaceWaterFloodingVolume*vars.surfaceWaterReduction;
+  vars.effectiveFloodReduction = vars.surfaceWaterFloodingVolume*0.75;
+  vars.annualAvoidedDamage = (vars.effectiveFloodReduction*vars.damageCostFactor)*vars.annualFloodProbability;
+  vars.annualAvoidedDisruption = vars.effectiveFloodReduction*vars.disruptionCostFactor*vars.annualFloodProbability;
+  vars.totalAnnualSavings = vars.annualAvoidedDamage+vars.annualAvoidedDisruption;
+  vars.year1 = -vars.implementationCost+vars.totalAnnualSavings;
+  vars.discountRate = 0.03;
+  vars.years = 30;
+  vars.annualCashFlow = vars.totalAnnualSavings-vars.annualMaintenanceCost; 
+  vars.netPresentValue30 = vars.year1 + (vars.annualCashFlow * (1 - Math.pow(1 + vars.discountRate, -(vars.years - 1))) / vars.discountRate) / (1 + vars.discountRate);
+  vars.roi30 = vars.netPresentValue30/vars.implementationCost;
+  vars.annualisedReturn = Math.pow(vars.netPresentValue30 / vars.implementationCost, 1 / 30) - 1;
+
+
+  return vars;
 }
