@@ -22,6 +22,14 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Only POST allowed" });
 
+  if (!req.body || typeof req.body === 'string') {
+    try {
+      req.body = JSON.parse(req.body);
+    } catch (err) {
+      return res.status(400).json({ error: 'Invalid JSON' });
+    }
+  }
+
   try {
     const { surface, location } = req.body;
 
@@ -40,16 +48,16 @@ export default async function handler(req, res) {
     
     // Perform calculations
     const surfaceNum = parseFloat(surface);
-    if (isNaN(surfaceNum) || surfaceNum <= 0) {
-      
+    if (!isNaN(surfaceNum) && surfaceNum > 0) {
       const calculations = calculateAll(surfaceNum, entry);
-
+      
       const floodingVolume = calculations.surfaceWaterFloodingVolume;
       const oneTimeImpact = calculations.oneTimeImpact;
       const underusedLand = calculations.underusedLand;
       const npv = calculations.netPresentValue30;
       const annualisedReturn = calculations.annualisedReturn;
-    
+
+
       // Return result
       return res.status(200).json({
         floodingVolume,
@@ -58,7 +66,8 @@ export default async function handler(req, res) {
         npv,
         annualisedReturn
       });
-
+    } else {
+      return res.status(400).json({ error: "Invalid surface value" });
     }
   } 
   catch (err) {
