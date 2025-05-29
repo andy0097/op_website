@@ -15,7 +15,7 @@ async function loadData() {
 // ===== Main API handler =====
 export default async function handler(req, res) {
   // CORS
-  res.setHeader("Access-Control-Allow-Origin", "https://openstead.webflow.io");
+  res.setHeader("Access-Control-Allow-Origin", "https://openstead.co");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
