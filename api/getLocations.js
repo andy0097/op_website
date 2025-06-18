@@ -2,8 +2,13 @@ import path from 'path';
 import { promises as fs } from 'fs';
 
 export default async function handler(req, res) {
-  // CORS headers
-  res.setHeader("Access-Control-Allow-Origin", "https://openstead.co");
+   // CORS headers - Allow multiple origins
+  const allowedOrigins = ["https://openstead.co", "https://openstead.webflow.io"];
+  const origin = req.headers.origin;
+  
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
